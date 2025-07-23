@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package subscription_v1;
+ 
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "https://github.com/A-mpol/effective-mobile-subscription-service/shared/proto/subscription/v1";
+
+service SubscriptionService {
+    rpc CreateSubscription(CreateSubscriptionRequest) returns (CreateSubscriptionResponse);
+    rpc GetSubscriptions(GetSubscriptionsRequest) returns (GetSubscriptionsResponse);
+    rpc UpdateSubscription(UpdateSubscriptionRequest)  returns (google.protobuf.Empty);
+    rpc DeleteSubscription(DeleteSubscriptionRequest) returns (google.protobuf.Empty);
+}
+
+message SubscriptionInfo {
+    string service_name = 2;
+    int64 price = 3;
+    string user_id = 4;
+    google.protobuf.Timestamp start_date = 5; 
+    google.protobuf.Timestamp end_date = 6; 
+}
+
+message Subscription {
+    string subscription_id = 1;
+    SubscriptionInfo info = 2;
+}
+
+message CreateSubscriptionRequest {
+    SubscriptionInfo info = 1;
+}
+
+message CreateSubscriptionResponse {
+    string subscription_id = 1;
+}
+
+message GetSubscriptionsRequest {
+    string user_id = 1;
+}
+
+message GetSubscriptionsResponse {
+    repeated Subscription subscriptions = 1;
+}
+
+message UpdateSubscriptionRequest {
+    string subscription_id = 1;
+    SubscriptionInfo info = 2;
+}
+
+message DeleteSubscriptionRequest {
+    string subscription_id = 1;
+}
+
