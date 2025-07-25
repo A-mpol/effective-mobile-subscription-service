@@ -4,26 +4,61 @@ package subscription_v1;
  
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "google/api/annotations.proto";
+
 
 option go_package = "https://github.com/A-mpol/effective-mobile-subscription-service/shared/proto/subscription/v1";
 
 service SubscriptionService {
-    rpc CreateSubscription(CreateSubscriptionRequest) returns (CreateSubscriptionResponse);
-    rpc GetSubscriptions(GetSubscriptionsRequest) returns (GetSubscriptionsResponse);
-    rpc UpdateSubscription(UpdateSubscriptionRequest)  returns (google.protobuf.Empty);
-    rpc DeleteSubscription(DeleteSubscriptionRequest) returns (google.protobuf.Empty);
+    rpc CreateSubscription(CreateSubscriptionRequest) returns (CreateSubscriptionResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/subscriptions"
+            body: "*"
+        };
+    }
+    rpc GetSubscriptions(GetSubscriptionsRequest) returns (GetSubscriptionsResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/subscriptions/{user_id}"
+        };
+    }
+    rpc UpdateSubscription(UpdateSubscriptionRequest)  returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            patch: "/api/v1/subscriptions/{subscription_id}"
+            body: "*"
+        };
+    }
+    rpc DeleteSubscription(DeleteSubscriptionRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/subscriptions/{subscription_id}"
+        };
+    }
+    rpc GetTotalCostSubscriptions(GetTotalCostSubscriptionsRequest) returns (GetTotalCostSubscriptionsResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/subscriptions/total-cost"
+        };
+    }
+}
+
+enum SubscriptionStatus {
+    SUBSCRIPTION_STATUS_UNSPECIFIED = 0;
+    SUBSCRIPTION_STATUS_ACTIVE = 1;
+    SUBSCRIPTION_STATUS_PAUSED = 2;
+    SUBSCRIPTION_STATUS_CANCELLED = 3;
+    SUBSCRIPTION_STATUS_EXPIRED = 4;
 }
 
 message SubscriptionInfo {
-    string service_name = 2;
-    int64 price = 3;
-    string user_id = 4;
-    google.protobuf.Timestamp start_date = 5; 
-    google.protobuf.Timestamp end_date = 6; 
+    string service_name = 1 [(validate.rules).string.min_len = 1];
+    int64 price = 2;
+    string user_id = 3 [(validate.rules).string.uuid = true];
+    google.protobuf.Timestamp start_date = 4 [(validate.rules).timestamp.required = true]; 
+    google.protobuf.Timestamp end_date = 5; 
+    SubscriptionStatus status = 6;
 }
 
 message Subscription {
-    string subscription_id = 1;
+    string subscription_id = 1 [(validate.rules).string.uuid = true];
     SubscriptionInfo info = 2;
 }
 
@@ -32,11 +67,11 @@ message CreateSubscriptionRequest {
 }
 
 message CreateSubscriptionResponse {
-    string subscription_id = 1;
+    string subscription_id = 1 [(validate.rules).string.uuid = true];
 }
 
 message GetSubscriptionsRequest {
-    string user_id = 1;
+    string user_id = 1 [(validate.rules).string.uuid = true];
 }
 
 message GetSubscriptionsResponse {
@@ -44,11 +79,22 @@ message GetSubscriptionsResponse {
 }
 
 message UpdateSubscriptionRequest {
-    string subscription_id = 1;
+    string subscription_id = 1 [(validate.rules).string.uuid = true];
     SubscriptionInfo info = 2;
 }
 
 message DeleteSubscriptionRequest {
-    string subscription_id = 1;
+    string subscription_id = 1 [(validate.rules).string.uuid = true];
+}
+
+message GetTotalCostSubscriptionsRequest {
+    google.protobuf.Timestamp start_date = 1;
+    google.protobuf.Timestamp end_date = 2;
+    repeated string user_ids = 3;
+    repeated string service_names = 4;
+}
+
+message GetTotalCostSubscriptionsResponse {
+    int64 total_cost = 1;
 }
 
