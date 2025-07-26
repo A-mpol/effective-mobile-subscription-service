@@ -49,11 +49,20 @@ tasks:
           GOBIN={{.BIN_DIR}} go install github.com/envoyproxy/protoc-gen-validate@{{.PROTOC_GEN_VALIDATE_VERSION}}
           }
 
+  proto:update-deps:
+      deps: [install-buf]
+      desc: Обновляет зависимости protobuf из удаленных репозиториев (googleapis и т.д.)
+      dir: shared/proto
+      cmds:
+        - |
+          echo "🔄 Обновляем зависимости buf..."
+          {{.BUF}} dep update
+
   proto:gen:
-      deps: [ install-buf, proto:install-plugins ]
+      deps: [ install-buf, proto:install-plugins, proto:update-deps ]
       desc: Генерация Go-кода из .proto
       env:
         PATH: "{{.BIN_DIR}}:{{.PATH}}"
-      dir: shared/proto
+      dir: proto
       cmds:
         - '{{.BUF}} generate'
