@@ -13,6 +13,7 @@ func (r *repository) GetTotalCostSubscriptions(ctx context.Context, filters serv
 	filtersEntry := converter.SubscriptionsFiltersToRepo(filters)
 
 	qb := sq.Select("COALESCE(SUM(price), 0)").
+		PlaceholderFormat(sq.Dollar).
 		From("subscriptions").
 		Where(sq.Eq{"deleted_at": sql.NullTime{Valid: false}})
 
@@ -24,7 +25,7 @@ func (r *repository) GetTotalCostSubscriptions(ctx context.Context, filters serv
 	}
 	qb = qb.Where(sq.GtOrEq{"start_date": filtersEntry.StartDate})
 	if filtersEntry.EndDate.Valid {
-		qb = qb.Where(sq.LtOrEq{"start_date": filtersEntry.EndDate})
+		qb = qb.Where(sq.LtOrEq{"end_date": filtersEntry.EndDate})
 	}
 
 	query, args, err := qb.ToSql()

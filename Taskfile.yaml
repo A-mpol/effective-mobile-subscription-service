@@ -15,6 +15,11 @@ vars:
   PROTOC_GEN_GRPC_GATEWAY: '{{.BIN_DIR}}/protoc-gen-grpc-gateway'
   PROTOC_GEN_VALIDATE: '{{.BIN_DIR}}/protoc-gen-validate'
 
+  OPEN_API_ORDER_V1_BASE: '{{.ROOT_DIR}}/api/order/v1/order.openapi.yaml'
+  OPEN_API_ORDER_V1_BUNDLE: '{{.ROOT_DIR}}/api/bundles/order.openapi.v1.bundle.yaml'
+  OPEN_API_FILES: '{{.ROOT_DIR}}/api/bundles'
+
+
 tasks:
   install-buf:
       desc: "Устанавливает Buf в каталог bin"
@@ -47,6 +52,10 @@ tasks:
           [ -f {{.PROTOC_GEN_VALIDATE}} ] || {
           echo '📦 Installing protoc-gen-validate...'
           GOBIN={{.BIN_DIR}} go install github.com/envoyproxy/protoc-gen-validate@{{.PROTOC_GEN_VALIDATE_VERSION}}
+          }
+          [ -f {{.BIN_DIR}}/protoc-gen-openapiv2 ] || {
+          echo '📦 Installing protoc-gen-openapiv2...'
+          GOBIN={{.BIN_DIR}} go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
           }
 
   proto:update-deps:

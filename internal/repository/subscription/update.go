@@ -9,13 +9,13 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (r *repository) UpdateSubscription(ctx context.Context, updatedSubscription serviceModel.UpdatedSubscription) (*emptypb.Empty, error) {
+func (r *repository) UpdateSubscription(ctx context.Context, updatedSubscription serviceModel.UpdatedSubscription) error {
 	updatedSubscriptionEntry := converter.UpdateSubscriptionToEntry(updatedSubscription)
 
 	qb := sq.Update("subscriptions").
+		PlaceholderFormat(sq.Dollar).
 		Set("user_id", updatedSubscriptionEntry.UserId).
 		Set("service_name", updatedSubscriptionEntry.ServiceName).
 		Set("price", updatedSubscriptionEntry.Price).
@@ -26,15 +26,15 @@ func (r *repository) UpdateSubscription(ctx context.Context, updatedSubscription
 
 	query, args, err := qb.ToSql()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	res, err := r.db.Exec(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	rowsAffected := res.RowsAffected()
 	if rowsAffected == 0 {
-		return nil, status.Error(codes.NotFound, "subscription not found or already deleted")
+		return status.Error(codes.NotFound, "subscription not found or already deleted")
 	}
-	return &emptypb.Empty{}, nil
+	return nil
 }

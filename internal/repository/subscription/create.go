@@ -9,10 +9,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r *repository) CreateSubscription(ctx context.Context, subscriptionInfo serviceModel.NewSubscriptionInfo) (subscriptionId string, err error) {
+func (r *repository) CreateSubscription(ctx context.Context, subscriptionInfo serviceModel.NewSubscriptionInfo) (uuid.UUID, error) {
 	subscriptionEntry := converter.NewSubscriptionInfoToEntry(subscriptionInfo)
 
-	subscriptionUUID := uuid.NewString()
+	subscriptionUUID := uuid.New()
 
 	qb := sq.Insert("subscriptions").
 		PlaceholderFormat(sq.Dollar).
@@ -28,11 +28,11 @@ func (r *repository) CreateSubscription(ctx context.Context, subscriptionInfo se
 
 	query, args, err := qb.ToSql()
 	if err != nil {
-		return "", err
+		return uuid.UUID{}, err
 	}
 
 	if _, err := r.db.Exec(ctx, query, args...); err != nil {
-		return "", err
+		return uuid.UUID{}, err
 	}
 
 	return subscriptionUUID, nil

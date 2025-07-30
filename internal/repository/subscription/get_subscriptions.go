@@ -8,13 +8,23 @@ import (
 	"github.com/A-mpol/effective-mobile-subscription-service/internal/repository/converter"
 	repoModel "github.com/A-mpol/effective-mobile-subscription-service/internal/repository/model"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/google/uuid"
 )
 
-func (r *repository) GetSubscriptions(ctx context.Context, userID string) ([]serviceModel.Subscription, error) {
-	qb := sq.Select("id", "service_name", "price", "start_date", "end_date").
+func (r *repository) GetSubscriptions(ctx context.Context, userID uuid.UUID) ([]serviceModel.Subscription, error) {
+	qb := sq.Select(
+		"id",
+		"service_name",
+		"price",
+		"start_date",
+		"end_date",
+	).
+		PlaceholderFormat(sq.Dollar).
 		From("subscriptions").
-		Where(sq.Eq{"user_id": userID}).
-		Where(sq.Eq{"deleted_at": sql.NullTime{Valid: false}})
+		Where(sq.And{
+			sq.Eq{"user_id": userID},
+			sq.Eq{"deleted_at": sql.NullTime{Valid: false}},
+		})
 
 	query, args, err := qb.ToSql()
 	if err != nil {

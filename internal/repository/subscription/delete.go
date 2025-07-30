@@ -2,30 +2,32 @@ package subscription
 
 import (
 	"context"
-	"database/sql"
+	"log"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"google.golang.org/protobuf/types/known/emptypb"
+	"github.com/google/uuid"
 )
 
-func (r *repository) DeleteSubscription(ctx context.Context, subscriptionID string) (*emptypb.Empty, error) {
+func (r *repository) DeleteSubscription(ctx context.Context, subscriptionID uuid.UUID) error {
 	qb := sq.Update("subscriptions").
-		Set("deleted_at", sql.NullTime{
-			Time:  time.Now(),
-			Valid: true,
-		}).
-		Where(sq.Eq{"id": subscriptionID}).
-		Where(sq.Eq{"deleted_at": sql.NullTime{Valid: false}})
+		PlaceholderFormat(sq.Dollar).
+		Set("deleted_at", time.Now()).
+		Where(sq.And{
+			sq.Eq{"id": subscriptionID},
+			sq.Eq{"deleted_at": nil},
+		})
 
 	query, args, err := qb.ToSql()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
+	log.Println(query)
+	log.Println(args)
 	if _, err := r.db.Exec(ctx, query, args...); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &emptypb.Empty{}, nil
+	return nil
 }

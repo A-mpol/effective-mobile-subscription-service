@@ -8,11 +8,18 @@ import (
 	"github.com/A-mpol/effective-mobile-subscription-service/internal/repository/converter"
 	repoModel "github.com/A-mpol/effective-mobile-subscription-service/internal/repository/model"
 	sq "github.com/Masterminds/squirrel"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (r *repository) GetListSubscriptions(ctx context.Context, in *emptypb.Empty) ([]serviceModel.Subscription, error) {
-	qb := sq.Select("*").
+func (r *repository) GetListSubscriptions(ctx context.Context) ([]serviceModel.Subscription, error) {
+	qb := sq.Select(
+		"id",
+		"user_id",
+		"service_name",
+		"price",
+		"start_date",
+		"end_date",
+	).
+		PlaceholderFormat(sq.Dollar).
 		From("subscriptions").
 		Where(sq.Eq{"deleted_at": sql.NullTime{Valid: false}})
 

@@ -1,4 +1,4 @@
-package repository
+package service
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type SubscriptionRepository interface {
+type SubscriptionService interface {
 	CreateSubscription(ctx context.Context, subscriptionInfo serviceModel.NewSubscriptionInfo) (uuid.UUID, error)
 	GetSubscriptions(ctx context.Context, userID uuid.UUID) ([]serviceModel.Subscription, error)
 	UpdateSubscription(ctx context.Context, updatedSubscription serviceModel.UpdatedSubscription) error
